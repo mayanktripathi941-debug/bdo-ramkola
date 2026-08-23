@@ -27,7 +27,7 @@ input.edit{width:100%;padding:7px;border:1px solid #d4dfda;border-radius:6px}
 </style>
 </head>
 <body>
-<header><h1>BDO RAMKOLA</h1><p>Block Development Office • Integrated Panchayat Monitoring & Command Centre • 41 Gram Panchayats</p></header>
+<header><h1>BDO RAMKOLA</h1><p>Block Development Office • Integrated Panchayat Monitoring & Command Centre • 41 Gram Panchayats • VDO-led monitoring</p></header>
 <main>
 <div class="tabs">
 <button class="active" onclick="tab('home',this)">🏠 Command Centre</button>
@@ -48,14 +48,14 @@ input.edit{width:100%;padding:7px;border:1px solid #d4dfda;border-radius:6px}
 <div class="card" style="margin-top:10px"><h2>BDO Attention Board</h2>
 <div class="notice">Blank values are intentionally shown as <b>Not entered</b>. Enter verified departmental data through <b>BDO Data Control</b>; the dashboard will then surface gaps and actions.</div>
 <div id="attention"></div></div>
-<div class="card" style="margin-top:10px"><h2>41-GP Quick View</h2><div class="scroll"><table><thead><tr><th>#</th><th>GP</th><th>Villages</th><th>Pradhan</th><th>Secretary</th><th>VDO</th><th>Cleanliness</th><th>RRC</th><th>JJM</th><th>IGRS</th><th>Actions</th></tr></thead><tbody id="homeRows"></tbody></table></div></div>
+<div class="card" style="margin-top:10px"><h2>41-GP Quick View</h2><div class="scroll"><table><thead><tr><th>#</th><th>GP</th><th>Villages</th><th>Pradhan</th><th>VDO</th><th>Cleanliness</th><th>RRC</th><th>JJM</th><th>IGRS</th><th>Actions</th></tr></thead><tbody id="homeRows"></tbody></table></div></div>
 </section>
 
 <section id="gps" class="page">
 <div class="card"><h2>Panchayat-wise Digital File</h2>
-<div class="toolbar"><input id="search" placeholder="Search GP / village / Pradhan / Secretary / VDO"><select id="gpSelect"></select></div>
+<div class="toolbar"><input id="search" placeholder="Search GP / village / Pradhan / VDO"><select id="gpSelect"></select></div>
 <div id="profile"></div></div>
-<div class="card" style="margin-top:10px"><h3>All 41 Gram Panchayats</h3><div class="scroll"><table><thead><tr><th>#</th><th>GP</th><th>Village(s)</th><th>Pradhan</th><th>Secretary</th><th>VDO</th><th>Open Actions</th></tr></thead><tbody id="gpRows"></tbody></table></div></div>
+<div class="card" style="margin-top:10px"><h3>All 41 Gram Panchayats</h3><div class="scroll"><table><thead><tr><th>#</th><th>GP</th><th>Village(s)</th><th>Pradhan</th><th>VDO</th><th>Open Actions</th></tr></thead><tbody id="gpRows"></tbody></table></div></div>
 </section>
 
 <section id="vdo" class="page"><div class="card"><h2>VDO Performance</h2><p style="color:var(--muted)">Performance will calculate from entered scheme/module percentages. No score is invented where data is absent.</p><div class="scroll"><table><thead><tr><th>VDO</th><th>GPs</th><th>GP List</th><th>Entered modules</th><th>Average</th><th>Open actions</th></tr></thead><tbody id="vdoRows"></tbody></table></div></div></section>
@@ -95,7 +95,7 @@ function profile(g){
 let r=data.find(x=>x.GP===g)||data[0],vs=r.Villages||[];
 document.getElementById("profile").innerHTML=
 '<div class="profile">'+
-mini("Gram Panchayat",r.GP)+mini("Villages",vs.length+" • "+vs.join(", "))+mini("Pradhan",r["Pradhan Name"])+mini("Secretary",r["Secretary Name"])+mini("VDO",r.VDO)+mini("Safai Karmchari",r["Safai Karmchari Count"])+mini("RRC",r["RRC Functional"])+mini("Overall %",score(r)===null?"Not entered":score(r))+
+mini("Gram Panchayat",r.GP)+mini("Villages",vs.length+" • "+vs.join(", "))+mini("Pradhan",r["Pradhan Name"])+mini("VDO",r.VDO)+mini("Safai Karmchari",r["Safai Karmchari Count"])+mini("RRC",r["RRC Functional"])+mini("Overall %",score(r)===null?"Not entered":score(r))+
 '</div><div class="detail"><div class="card"><h3>Village Register</h3>'+vs.map((v,i)=>'<div style="padding:8px;border-bottom:1px solid #e8eeeb"><b>'+ (i+1)+'. '+esc(v)+'</b><br><small>JJM: '+(esc(r["JJM Coverage %"])||"Not entered")+' • Cleanliness: '+(esc(r["Cleanliness Today"])||"Not entered")+' • Waste collection: '+(esc(r["Waste Collection Functional"])||"Not entered")+'</small></div>').join("")+
 '</div><div class="card"><h3>Scheme Snapshot</h3>'+pct.map(f=>'<p style="margin:8px 0"><b>'+esc(f.replace(" %",""))+'</b>: '+(esc(r[f])||"Not entered")+'</p>').join("")+'</div></div>'+
 '<div class="card" style="margin-top:10px"><h3>Complete GP Record</h3><div class="modulegrid">'+Object.entries(modules).map(([m,fs])=>'<div class="module"><h4>'+m+'</h4>'+fs.map(f=>'<div style="margin:5px 0"><small>'+esc(f)+'</small><br>'+status(r[f])+'</div>').join("")+'</div>').join("")+'</div></div>';
@@ -106,8 +106,8 @@ document.getElementById("villagesCount").textContent=data.reduce((a,r)=>a+(r.Vil
 document.getElementById("pradhanCount").textContent=data.filter(r=>r["Pradhan Name"]).length+"/41";
 document.getElementById("secretaryCount").textContent=data.filter(r=>r["Secretary Name"]).length+"/41";
 document.getElementById("vdoCount").textContent=data.filter(r=>r.VDO).length+"/41";
-document.getElementById("homeRows").innerHTML=data.map((r,i)=>'<tr><td>'+(i+1)+'</td><td class="link" onclick="openGP(\''+esc(r.GP)+'\')">'+esc(r.GP)+'</td><td>'+esc((r.Villages||[]).join(", "))+'</td><td>'+esc(r["Pradhan Name"]||"—")+'</td><td>'+esc(r["Secretary Name"]||"—")+'</td><td>'+esc(r.VDO||"—")+'</td><td>'+status(r["Cleanliness Today"])+'</td><td>'+status(r["RRC Functional"])+'</td><td>'+esc(r["JJM Coverage %"]||"—")+'</td><td>'+esc(r["IGRS Pending"]||"—")+'</td><td>'+esc(r["Open Actions"]||"—")+'</td></tr>').join("");
-document.getElementById("gpRows").innerHTML=data.map((r,i)=>'<tr><td>'+(i+1)+'</td><td class="link" onclick="openGP(\''+esc(r.GP)+'\')">'+esc(r.GP)+'</td><td>'+esc((r.Villages||[]).join(", "))+'</td><td>'+esc(r["Pradhan Name"]||"—")+'</td><td>'+esc(r["Secretary Name"]||"—")+'</td><td>'+esc(r.VDO||"—")+'</td><td>'+esc(r["Open Actions"]||"—")+'</td></tr>').join("");
+document.getElementById("homeRows").innerHTML=data.map((r,i)=>'<tr><td>'+(i+1)+'</td><td class="link" onclick="openGP(\''+esc(r.GP)+'\')">'+esc(r.GP)+'</td><td>'+esc((r.Villages||[]).join(", "))+'</td><td>'+esc(r["Pradhan Name"]||"—")+'</td><td>'+""+'</td><td>'+esc(r.VDO||"—")+'</td><td>'+status(r["Cleanliness Today"])+'</td><td>'+status(r["RRC Functional"])+'</td><td>'+esc(r["JJM Coverage %"]||"—")+'</td><td>'+esc(r["IGRS Pending"]||"—")+'</td><td>'+esc(r["Open Actions"]||"—")+'</td></tr>').join("");
+document.getElementById("gpRows").innerHTML=data.map((r,i)=>'<tr><td>'+(i+1)+'</td><td class="link" onclick="openGP(\''+esc(r.GP)+'\')">'+esc(r.GP)+'</td><td>'+esc((r.Villages||[]).join(", "))+'</td><td>'+esc(r["Pradhan Name"]||"—")+'</td><td>'+""+'</td><td>'+esc(r.VDO||"—")+'</td><td>'+esc(r["Open Actions"]||"—")+'</td></tr>').join("");
 document.getElementById("gpSelect").innerHTML=data.map(r=>'<option>'+esc(r.GP)+'</option>').join("");
 document.getElementById("gpSelect").onchange=e=>profile(e.target.value);
 profile(data[0].GP);
@@ -122,7 +122,7 @@ let m=document.getElementById("moduleSelect").value,fs=modules[m];
 document.getElementById("moduleTable").innerHTML='<div class="scroll"><table><thead><tr><th>GP</th><th>Villages</th>'+fs.map(f=>'<th>'+esc(f)+'</th>').join("")+'</tr></thead><tbody>'+data.map(r=>'<tr><td class="link" onclick="openGP(\''+esc(r.GP)+'\')">'+esc(r.GP)+'</td><td>'+esc((r.Villages||[]).join(", "))+'</td>'+fs.map(f=>'<td>'+status(r[f])+'</td>').join("")+'</tr>').join("")+'</tbody></table></div>';
 }
 function renderControl(){
-let cols=["GP","Pradhan Name","Pradhan Mobile","Secretary Name","Secretary Mobile","VDO","Safai Karmchari Count","Safai Area/Beat","Cleanliness Today","RRC Functional","Waste Collection Functional","SHG Count","VO Status","CLF Status","RF Status","Schools Count","MDM Status","Anganwadi Count","Health Status","JJM Status","JJM Coverage %","e-Library Status","IGRS Pending","IGRS Overdue","Family ID %","SHG HH %","VBG-RAM-G %","PMAY-G %","CMAY-G %","SBM Status","Open Actions"];
+let cols=["GP","Pradhan Name","Pradhan Mobile","VDO","Safai Karmchari Count","Safai Area/Beat","Cleanliness Today","RRC Functional","Waste Collection Functional","SHG Count","VO Status","CLF Status","RF Status","Schools Count","MDM Status","Anganwadi Count","Health Status","JJM Status","JJM Coverage %","e-Library Status","IGRS Pending","IGRS Overdue","Family ID %","SHG HH %","VBG-RAM-G %","PMAY-G %","CMAY-G %","SBM Status","Open Actions"];
 document.getElementById("controlHead").innerHTML="<tr>"+cols.map(c=>"<th>"+esc(c)+"</th>").join("")+"</tr>";
 document.getElementById("controlRows").innerHTML=data.map((r,i)=>"<tr>"+cols.map(c=>c==="GP"?'<td><b>'+esc(r.GP)+'</b></td>':'<td><input class="edit" value="'+esc(r[c])+'" onchange="data['+i+'][\\''+c+'\\']=this.value"></td>').join("")+"</tr>").join("");
 }
